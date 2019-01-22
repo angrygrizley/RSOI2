@@ -20,6 +20,7 @@
 
 	<modules>
 		<module>users-service</module>
+		<module>games-service</module>
 	</modules>
 
 </project>
