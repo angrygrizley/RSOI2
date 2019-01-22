@@ -14,4 +14,5 @@ public interface GamesService {
     void addReview(Long id) throws GameNotFoundException;
     void deleteReview(Long id) throws GameNotFoundException;
     void setRating(Long id, double rating) throws GameNotFoundException;
+    List<Game> getGamesByRating();
 }

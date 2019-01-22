@@ -56,4 +56,10 @@ public class GamesServiceController {
         return gamesService.getGameById(id);
     }
 
+    @GetMapping(value = "/gamesbyrating")
+    public List<Game> getGamesByRating(){
+        logger.info("[GET] /games ");
+        return gamesService.getGamesByRating();
+    }
+
 }

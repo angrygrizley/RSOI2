@@ -30,6 +30,7 @@
 		<module>users-service</module>
 		<module>games-service</module>
         <module>reviews-service</module>
+        <module>gateway-service</module>
 	</modules>
 
 </project>

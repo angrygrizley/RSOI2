@@ -71,4 +71,9 @@ public class GamesServiceImplementation implements GamesService {
         return gamesRepository.findById(id)
                 .orElseThrow(() -> new GameNotFoundException(id));
     }
+
+    @Override
+    public List<Game> getGamesByRating() {
+        return gamesRepository.findAllOrderByRating();
+    }
 }
