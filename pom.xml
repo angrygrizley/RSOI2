@@ -6,7 +6,15 @@
 	<groupId>com.angrygrizley</groupId>
 	<artifactId>RSOI2</artifactId>
 	<version>0.1</version>
-	<packaging>pom</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>2.1.2.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <packaging>pom</packaging>
 
 	<name>RSOI2</name>
 	<description>RSOI2</description>
@@ -21,6 +29,7 @@
 	<modules>
 		<module>users-service</module>
 		<module>games-service</module>
+        <module>reviews-service</module>
 	</modules>
 
 </project>
