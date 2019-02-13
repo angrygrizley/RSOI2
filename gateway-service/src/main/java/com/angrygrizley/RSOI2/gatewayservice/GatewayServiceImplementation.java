@@ -57,82 +57,50 @@ public class GatewayServiceImplementation implements GatewayService {
 
     @Override
     public String getReviewsByUser(Long userId) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String url = reviewsServiceUrl + "/reviews/byuser/" + userId;
-        URL website = new URL(url);
-        URLConnection connection = website.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+        HttpGet request = new HttpGet(url);
+        HttpResponse response = httpClient.execute(request);
 
-        StringBuilder response = new StringBuilder();
-        String inputLine;
+        String result = EntityUtils.toString(response.getEntity());
 
-        while ((inputLine = in.readLine()) != null)
-            response.append(inputLine);
-
-        in.close();
-
-        return response.toString();
+        return result;
     }
 
     @Override
     public String getGamesWithReviews() throws IOException, JSONException{
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String url = gamesServiceUrl + "/games";
-        URL website = new URL(url);
-        URLConnection connection = website.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF8"));
+        HttpGet request = new HttpGet(url);
+        HttpResponse response = httpClient.execute(request);
+        String stringResponse = EntityUtils.toString(response.getEntity());
 
+        JSONArray games = new JSONArray(stringResponse);
 
-        StringBuilder response = new StringBuilder();
-        String inputLine;
-
-        while ((inputLine = in.readLine()) != null)
-            response.append(inputLine);
-
-        in.close();
-
-        JSONArray games = new JSONArray(response.toString());
-
-        JSONArray jsonArray = new JSONArray();
-
-
-        List<String> temp = new ArrayList<>();
         StringBuilder result = new StringBuilder();
         result.append("[");
         for (int i = 0; i < games.length(); i++) {
             //get the JSON Object
-            JSONObject obj = games.getJSONObject(i);
-            String sfname = obj.getString("id");
-            // temp.add(sfname);
+            JSONObject game = games.getJSONObject(i);
+            String gameId = game.getString("id");
+            url = reviewsServiceUrl +"/reviews/bygame/" + gameId;
 
+            request = new HttpGet(url);
+            response = httpClient.execute(request);
+            String gameReviews = EntityUtils.toString(response.getEntity());
 
-            url = reviewsServiceUrl +"/reviews/bygame/" + sfname;
-            website = new URL(url);
-            connection = website.openConnection();
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-            response = new StringBuilder();
-            StringBuilder reviews = new StringBuilder(",\n\"reviews\":\n");
-            response.append(obj);
-            while ((inputLine = in.readLine()) != null)
-                reviews.append(inputLine);
-            in.close();
-            reviews.append("\n");
-            response.insert(response.length()-1, reviews);
+            StringBuilder gameWithReviews = new StringBuilder();
+            gameWithReviews.append(game);
+            gameWithReviews.insert(gameWithReviews.length()-1, gameReviews);
+
             if (i != games.length()-1)
-                response.append(",");
-            //jsonObject = new JSONObject(response.toString());
+                gameWithReviews.append(",");
 
-            result.append(response);
+            result.append(gameWithReviews);
         }
         result.append("]");
         System.out.println();
-
-        // RestTemplate
-        // Jackson / gson
-//        for (String a: temp) {
-//
-//        }
-
         System.out.print(result);
-
         return result.toString();
     }
 
@@ -140,9 +108,11 @@ public class GatewayServiceImplementation implements GatewayService {
     public void addUser(String user) throws IOException{
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(usersServiceUrl + "/users");
+
         StringEntity params = new StringEntity(user);
         request.addHeader("content-type", "application/json");
         request.setEntity(params);
+
         httpClient.execute(request);
     }
 
@@ -186,32 +156,23 @@ public class GatewayServiceImplementation implements GatewayService {
     public void deleteReview(Long reviewId) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         try{
-            String url = reviewsServiceUrl + "/reviews/" + reviewId;
-            URL website = new URL(url);
-            URLConnection connection = website.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF8"));
+            HttpGet request = new HttpGet(reviewsServiceUrl + "/reviews" + reviewId);
+            HttpResponse response = httpClient.execute(request);
+            String stringResponse = EntityUtils.toString(response.getEntity());
 
-
-            StringBuilder game = new StringBuilder();
-            String inputLine;
-
-            while ((inputLine = in.readLine()) != null)
-                game.append(inputLine);
-            in.close();
-            JSONObject obj = new JSONObject(game.toString());
+            JSONObject obj = new JSONObject(stringResponse);
             Long gameId = obj.getLong("gameId");
 
+            HttpDelete request1 = new HttpDelete(reviewsServiceUrl + "/reviews/" + reviewId);
+            HttpResponse response1 = httpClient.execute(request1);
 
-            HttpDelete request = new HttpDelete(reviewsServiceUrl + "/reviews/" + reviewId);
-            HttpResponse response = httpClient.execute(request);
+            HttpPost request2 = new HttpPost(gamesServiceUrl + "/games/" + gameId + "/delete_review");
+            response1 = httpClient.execute(request2);
 
-            HttpPost request3 = new HttpPost(gamesServiceUrl + "/games/" + gameId + "/delete_review");
-            response = httpClient.execute(request3);
-
-            HttpGet request2 = new HttpGet(reviewsServiceUrl + "/reviews/bygame/" + gameId);
-            HttpResponse response2 = httpClient.execute(request2);
-            String responseString2 = EntityUtils.toString(response2.getEntity(), "UTF-8");
-            JSONArray revsArray = new JSONArray(responseString2);
+            HttpGet request3 = new HttpGet(reviewsServiceUrl + "/reviews/bygame/" + gameId);
+            HttpResponse response3 = httpClient.execute(request3);
+            String responseString3 = EntityUtils.toString(response3.getEntity(), "UTF-8");
+            JSONArray revsArray = new JSONArray(responseString3);
             double rating = 0;
             for (int i = 0; i < revsArray.length(); i++){
                 rating += revsArray.getJSONObject(i).getDouble("rating");
@@ -219,7 +180,7 @@ public class GatewayServiceImplementation implements GatewayService {
             double averageRating = rating/revsArray.length();
 
             HttpPost request4 = new HttpPost(gamesServiceUrl + "/games/" + gameId +"/setRating/" + averageRating);
-            HttpResponse response4 = httpClient.execute(request4);
+            response1 = httpClient.execute(request4);
         } catch (Exception ex) {
             // обработка исключения
         } finally {
@@ -232,19 +193,11 @@ public class GatewayServiceImplementation implements GatewayService {
     public String getReviewsForGame(Long gameId, PageRequest p) throws IOException{
         String url = reviewsServiceUrl + "/reviews/bygame/" + gameId +
                 "?page=" + p.getPageNumber() + "&size=" + p.getPageSize();
-        URL website = new URL(url);
-        URLConnection connection = website.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(url);
+        HttpResponse response = httpClient.execute(request);
 
-        StringBuilder response = new StringBuilder();
-        String inputLine;
-
-        while ((inputLine = in.readLine()) != null)
-            response.append(inputLine);
-
-        in.close();
-
-        return response.toString();
+        return EntityUtils.toString(response.getEntity());
     }
 
     @Override
@@ -261,6 +214,33 @@ public class GatewayServiceImplementation implements GatewayService {
     public String getGamesByRating() throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(gamesServiceUrl + "/gamesbyrating");
+        HttpResponse response = httpClient.execute(request);
+
+        return EntityUtils.toString(response.getEntity());
+    }
+
+    @Override
+    public String editReview(String review) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(reviewsServiceUrl + "/reviews/edit");
+        HttpResponse response = httpClient.execute(request);
+
+        return EntityUtils.toString(response.getEntity());
+    }
+
+    @Override
+    public String editUser(String user) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(reviewsServiceUrl + "/users/edit");
+        HttpResponse response = httpClient.execute(request);
+
+        return EntityUtils.toString(response.getEntity());
+    }
+
+    @Override
+    public String editGame(String game) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(reviewsServiceUrl + "/games/edit");
         HttpResponse response = httpClient.execute(request);
 
         return EntityUtils.toString(response.getEntity());

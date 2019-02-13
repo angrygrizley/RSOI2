@@ -14,4 +14,5 @@ public interface ReviewsService {
     void deleteReviewsByGame(Long gameId);
     void deleteById(Long id);
     Review getReviewById(Long id) throws ReviewNotFoundException;
+    Review putReview(Review newReview) throws ReviewNotFoundException;
 }

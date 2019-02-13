@@ -49,4 +49,16 @@ public class UsersServiceImplementation implements UsersService {
                 .orElseThrow(() -> new UserNotFoundException(id));
         usersRepository.save(user);
     }
+
+    @Override
+    public User putUser(User newUser) throws UserNotFoundException {
+        return usersRepository.findById(newUser.getId()).map(User -> {
+            User.setLastName(newUser.getLastName());
+            User.setLogin(newUser.getLogin());
+            User.setName(newUser.getName());
+            User.setRating(newUser.getRating());
+            User.setReviewsNum(newUser.getReviewsNum());
+            return usersRepository.save(User);
+        }).orElseThrow(() -> new UserNotFoundException(newUser.getId()));
+    }
 }

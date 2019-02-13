@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GamesRepository extends JpaRepository<Game, Long> {
-    public List<Game> findAllOrderByRating();
+    public List<Game> findAllByOrderByRating();
 }

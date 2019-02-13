@@ -12,7 +12,6 @@ import java.io.IOException;
 
 @RestController
 @Slf4j
-@RequestMapping("/api")
 public class GatewayServiceController {
     private final GatewayService gatewayService;
     private Logger logger;
@@ -92,5 +91,23 @@ public class GatewayServiceController {
     public String getGamesByRating() throws IOException {
         logger.info("[GET] /games");
         return gatewayService.getGamesByRating();
+    }
+
+    @PutMapping (path = "reviews/edit")
+    public String editReview(@RequestBody String review) throws IOException {
+        logger.info("[PUT] /reviews/edit");
+        return gatewayService.editReview(review);
+    }
+
+    @PutMapping (path = "users/edit")
+    public String editUser(@RequestBody String user) throws IOException {
+        logger.info("[PUT] /users/edit");
+        return gatewayService.editUser(user);
+    }
+
+    @PutMapping (path = "games/edit")
+    public String editGame(@RequestBody String game) throws IOException {
+        logger.info("[PUT] /games/edit");
+        return gatewayService.editGame(game);
     }
 }

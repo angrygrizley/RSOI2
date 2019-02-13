@@ -44,9 +44,17 @@ public class UsersServiceController {
         return usersService.findUserByLogin(login);
     }
 
-    @DeleteMapping(value = "users/{id}")
+    @DeleteMapping(value = "/users/{id}")
     public void deleteUserById(@PathVariable Long id){
         logger.info("[DELETE] /users/" + id);
         usersService.deleteUser(id);
     }
+
+    @PutMapping(value = "users/edit")
+    public void editUser(@RequestBody User user) throws UserNotFoundException {
+        logger.info("[PUT] /users/edit");
+        usersService.putUser(user);
+    }
+
+
 }

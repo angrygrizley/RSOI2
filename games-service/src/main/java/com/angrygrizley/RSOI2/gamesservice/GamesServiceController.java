@@ -62,4 +62,9 @@ public class GamesServiceController {
         return gamesService.getGamesByRating();
     }
 
+    @PutMapping(value = "/games/edit")
+    public void putGame(@RequestBody Game game) throws GameNotFoundException {
+        logger.info("[PUT] /games/edit");
+        gamesService.putGame(game);
+    }
 }

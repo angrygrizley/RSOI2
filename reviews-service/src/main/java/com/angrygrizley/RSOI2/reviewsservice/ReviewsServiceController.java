@@ -71,4 +71,10 @@ public class ReviewsServiceController {
         logger.info("[DELETE] /reviews/bygame/" + gameId);
         reviewsService.deleteReviewsByGame(gameId);
     }
+
+    @PutMapping(value = "reviews/edit")
+    public void editReview(@RequestBody Review review) throws ReviewNotFoundException {
+        logger.info("[PUT] /reviews/edit");
+        reviewsService.putReview(review);
+    }
 }

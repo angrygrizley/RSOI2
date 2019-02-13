@@ -17,6 +17,9 @@ public interface GatewayService {
     String getReviewsForGame(Long gameId, PageRequest p) throws IOException;
     String getGameById(Long gameId) throws IOException;
     String getGamesByRating() throws IOException;
+    String editReview(String review) throws IOException;
+    String editUser(String user) throws IOException;
+    String editGame (String game) throws IOException;
     void addUser(String user) throws IOException;
     void createReview(String review) throws IOException;
     void deleteReview(Long reviewId) throws IOException;

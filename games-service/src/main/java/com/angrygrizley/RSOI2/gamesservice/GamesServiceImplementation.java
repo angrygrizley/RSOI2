@@ -74,6 +74,18 @@ public class GamesServiceImplementation implements GamesService {
 
     @Override
     public List<Game> getGamesByRating() {
-        return gamesRepository.findAllOrderByRating();
+        return gamesRepository.findAllByOrderByRating();
+    }
+
+    @Override
+    public Game putGame(Game newGame) throws GameNotFoundException {
+        return gamesRepository.findById(newGame.getId()).map(Game -> {
+            Game.setDescription(newGame.getDescription());
+            Game.setDeveloper(newGame.getDeveloper());
+            Game.setName(newGame.getName());
+            Game.setRating(newGame.getRating());
+            Game.setReviewsNum(newGame.getReviewsNum());
+            return gamesRepository.save(Game);
+        }).orElseThrow(() -> new GameNotFoundException(newGame.getId()));
     }
 }

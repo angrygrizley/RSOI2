@@ -37,7 +37,6 @@ public class ReviewsServiceImplementation implements ReviewsService {
     }
 
 
-
     @Override
     @Transactional
     public Page<Review> getReviewsByGame(Long gameId, PageRequest p) {
@@ -64,5 +63,16 @@ public class ReviewsServiceImplementation implements ReviewsService {
     @Override
     public Review getReviewById(Long id) throws ReviewNotFoundException {
         return reviewsRepository.findById(id).orElseThrow(() -> new ReviewNotFoundException(id));
+    }
+
+    @Override
+    public Review putReview(Review newReview) throws ReviewNotFoundException {
+        return reviewsRepository.findById(newReview.getId()).map(Review -> {
+            Review.setPostedTime(newReview.getPostedTime());
+            Review.setRating(newReview.getRating());
+            Review.setText(newReview.getText());
+            Review.setUid(newReview.getUid());
+            return reviewsRepository.save(Review);
+        }).orElseThrow(() -> new ReviewNotFoundException(newReview.getId()));
     }
 }

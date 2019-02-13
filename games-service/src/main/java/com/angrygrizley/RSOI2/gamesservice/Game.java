@@ -22,7 +22,7 @@ public class Game {
     private String developer;
 
     @Lob
-    @Column(name = "DESCRIPTION", columnDefinition = "LONGTEXT")
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @Column(name = "REVIEWS_NUM", columnDefinition = "int default 0")
